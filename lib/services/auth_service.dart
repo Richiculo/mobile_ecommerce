@@ -22,4 +22,39 @@ class AuthService {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> getUserProfile(String token) async {
+    final url = Uri.parse('$baseUrl/perfil/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Token $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print('Error al obtener perfil: ${response.statusCode}');
+      print('Respuesta: ${response.body}');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> updateProfile(
+      Map<String, dynamic> data, String token) async {
+    final url = Uri.parse('$baseUrl/actualizar');
+    final resp = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token $token'
+      },
+      body: jsonEncode(data),
+    );
+    if (resp.statusCode == 200) {
+      return json.decode(resp.body)['usuario'] as Map<String, dynamic>;
+    }
+    return null;
+  }
 }

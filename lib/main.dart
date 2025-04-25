@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ecommerce/providers/producto_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_ecommerce/providers/auth_provider.dart';
-import 'pages/login_page.dart';
-import 'pages/home_page.dart';
+import 'pages/home/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-            create: (_) => AuthProvider()..checkLoginStatus())
+            create: (_) => AuthProvider()..checkLoginStatus()),
+        ChangeNotifierProvider(
+            create: (_) => ProductoProvider()..cargarProductos()),
       ],
       child: MaterialApp(
         title: 'Ecommerce App',
@@ -24,16 +26,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.indigo,
           useMaterial3: true,
         ),
-        home: Consumer<AuthProvider>(
-          builder: (context, auth, _) {
-            if (auth.isLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            return auth.isAuthenticated ? const HomePage() : const LoginPage();
-          },
-        ),
+        home: HomePage(),
       ),
     );
   }
