@@ -20,11 +20,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _loadToken() async {
     _token = await _storage.read(key: 'token');
-    print('Token leído: $_token');
     if (_token != null) {
       _user = await _authService.getUserProfile(_token!);
-    } else {
-      print('Token no encontrado');
     }
     _loading = false;
     notifyListeners();
@@ -40,7 +37,7 @@ class AuthProvider with ChangeNotifier {
       _token = data['token'];
       _user = data['user'];
       await _storage.write(key: 'token', value: _token);
-      print('Token guardado: $_token');
+      await _storage.write(key: 'user_id', value: _user?['id'].toString());
       notifyListeners();
       return true;
     }

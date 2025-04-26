@@ -3,6 +3,7 @@ import 'package:mobile_ecommerce/providers/producto_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_ecommerce/providers/auth_provider.dart';
 import 'pages/home/home_page.dart';
+import 'package:mobile_ecommerce/providers/cart_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,6 +20,9 @@ class MyApp extends StatelessWidget {
             create: (_) => AuthProvider()..checkLoginStatus()),
         ChangeNotifierProvider(
             create: (_) => ProductoProvider()..cargarProductos()),
+        ChangeNotifierProvider(
+          create: (_) => CartProvider(),
+        ),
       ],
       child: MaterialApp(
         title: 'Ecommerce App',
