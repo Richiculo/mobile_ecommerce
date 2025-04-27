@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/producto_model.dart';
-import '../config/api_config.dart';
+import '../../models/producto_model.dart';
+import '../../config/api_config.dart';
 
 class ProductoService {
-  final url = Uri.parse('$baseUrl/productos/productos/');
+  final url = Uri.parse('${baseUrl}/productos/productos/');
   Future<List<Producto>> obtenerProductos() async {
     final response = await http.get(url);
 

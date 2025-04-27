@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/cart_service.dart';
-import '../models/cart_model.dart';
-import '../models/producto_model.dart';
+import '../../services/pedidos/cart_service.dart';
+import '../../models/cart_model.dart';
 
 class CartProvider with ChangeNotifier {
   final CartService _cartService = CartService();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/auth/auth_provider.dart';
 
 void mostrarAgregarDireccionDialog(BuildContext ctx, AuthProvider auth) {
   final paisC = TextEditingController();

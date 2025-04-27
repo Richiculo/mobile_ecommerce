@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/producto_model.dart';
-import '../services/producto_service.dart';
+import '../../models/producto_model.dart';
+import '../../services/productos/producto_service.dart';
 
 class ProductoProvider with ChangeNotifier {
   final ProductoService _service = ProductoService();

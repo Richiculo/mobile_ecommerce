@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ecommerce/models/producto_model.dart';
 import 'package:mobile_ecommerce/pages/login_page.dart';
-import 'package:mobile_ecommerce/providers/auth_provider.dart';
-import 'package:mobile_ecommerce/providers/cart_provider.dart';
+import 'package:mobile_ecommerce/providers/auth/auth_provider.dart';
+import 'package:mobile_ecommerce/providers/pedidos/cart_provider.dart';
 import 'package:provider/provider.dart';
 
 class DetalleProductoPage extends StatelessWidget {
@@ -95,6 +95,19 @@ class DetalleProductoPage extends StatelessWidget {
             // Campo para seleccionar cantidad
             Row(
               children: [
+                const Icon(Icons.check_circle_outline,
+                    color: Colors.blueAccent),
+                const SizedBox(width: 8),
+                Text(
+                  product.estaDisponible ? 'Disponible' : 'No Disponible',
+                  style: TextStyle(
+                    color: product.estaDisponible
+                        ? Colors.blueAccent
+                        : Colors.redAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const Text("Cantidad:"),
                 IconButton(
                   icon: const Icon(Icons.remove),

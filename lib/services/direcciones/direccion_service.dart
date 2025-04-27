@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../config/api_config.dart';
+import '../../config/api_config.dart';
 
 class DireccionService {
   Future<Map<String, dynamic>?> createDireccion(
@@ -33,5 +33,18 @@ class DireccionService {
     if (resp.statusCode == 200)
       return json.decode(resp.body) as Map<String, dynamic>;
     return null;
+  }
+
+  Future<Map<String, dynamic>?> getDir(int direccionId) async {
+    final url = Uri.parse('$baseUrl/direcciones/$direccionId/');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print('Error al obtener direccion: ${response.statusCode}');
+      print('Respuesta: ${response.body}');
+      return null;
+    }
   }
 }

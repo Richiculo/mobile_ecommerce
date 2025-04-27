@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../config/api_config.dart';
-import '../models/producto_model.dart';
+import '../../config/api_config.dart';
+import '../../models/producto_model.dart';
 
 class CartService {
   final storage = const FlutterSecureStorage();
@@ -93,7 +93,6 @@ class CartService {
     required int cantidad,
   }) async {
     final token = await _getToken();
-    print(productoId);
     final url = Uri.parse('${baseUrl}/pedidos/itemcarts/');
 
     final response = await http.post(url,

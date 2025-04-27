@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/auth/auth_provider.dart';
 import '../login_page.dart';
 import './editar_perfil_dialog.dart';
 import './widgets/direccion_section.dart';
@@ -12,7 +12,6 @@ class PerfilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
-
     // 1) Si aún no hay user, muestro un mensaje
     if (user == null) {
       return Scaffold(
@@ -21,7 +20,6 @@ class PerfilPage extends StatelessWidget {
       );
     }
 
-    // 2) Si tengo user, construyo la UI
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
@@ -36,7 +34,6 @@ class PerfilPage extends StatelessWidget {
     );
   }
 
-  // 3) Recibe el BuildContext
   Widget _buildBody(
       BuildContext context, Map<String, dynamic> user, AuthProvider auth) {
     return Padding(

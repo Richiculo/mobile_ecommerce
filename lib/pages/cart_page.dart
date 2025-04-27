@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/cart_provider.dart';
+import '../providers/pedidos/cart_provider.dart';
+import '../pages/venta_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -71,9 +72,10 @@ class _CartPageState extends State<CartPage> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Compra finalizada (demo)')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const VentaPage()),
                           );
                         },
                         icon: const Icon(Icons.payment),

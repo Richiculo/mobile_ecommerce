@@ -1,41 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../providers/auth_provider.dart';
+import '../../../providers/auth/auth_provider.dart';
 import '../agregar_direccion_dialog.dart';
 import '../editar_direccion_dialog.dart';
 
-class DireccionSection extends StatelessWidget {
+class DireccionSection extends StatefulWidget {
   const DireccionSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final auth = Provider.of<AuthProvider>(context);
-    final user = auth.user!;
-    final dir = user['direccion'];
+  State<DireccionSection> createState() => _DireccionSectionState();
+}
 
-    if (dir != null) {
-      // Si ya hay dirección, la mostramos con opción a editar
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Dirección:',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          Text('${dir['calle']} #${dir['numero']}, ${dir['ciudad']}'),
-          const SizedBox(height: 10),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.edit_location_alt),
-            label: const Text('Editar dirección'),
-            onPressed: () => mostrarDialogoEditarDireccion(context, auth, dir),
-          ),
-        ],
-      );
-    } else {
-      // No hay dirección: botón para agregar
-      return ElevatedButton.icon(
-        icon: const Icon(Icons.add_location),
-        label: const Text('Agregar dirección'),
-        onPressed: () => mostrarAgregarDireccionDialog(context, auth),
-      );
+class _DireccionSectionState extends State<DireccionSection> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDireccion();
+  }
+
+  Future<void> _cargarDireccion() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+
+    // Solo carga la dirección si no está ya cargada
+    if (auth.direccionActual == null) {
+      final user = auth.user!;
+      final direccionId = user['direccion'];
+
+      if (direccionId != null) {
+        await auth.getDireccion(direccionId);
+      }
     }
+
+    // Después de cargar los datos, se actualiza la UI
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, child) {
+        final user = auth.user!;
+        final direccion = auth.direccionActual;
+
+        if (direccion != null) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Dirección:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                  '${direccion['calle']} #${direccion['numero']}, ${direccion['ciudad']}'),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.edit_location_alt),
+                label: const Text('Editar dirección'),
+                onPressed: () =>
+                    mostrarDialogoEditarDireccion(context, auth, direccion),
+              ),
+            ],
+          );
+        } else {
+          return ElevatedButton.icon(
+            icon: const Icon(Icons.add_location),
+            label: const Text('Agregar dirección'),
+            onPressed: () => mostrarAgregarDireccionDialog(context, auth),
+          );
+        }
+      },
+    );
   }
 }

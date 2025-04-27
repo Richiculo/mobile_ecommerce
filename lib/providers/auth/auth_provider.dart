@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../services/auth_service.dart';
-import '../services/direccion_service.dart';
+import '../../services/auth/auth_service.dart';
+import '../../services/direcciones/direccion_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final _storage = const FlutterSecureStorage();
@@ -13,6 +13,10 @@ class AuthProvider with ChangeNotifier {
   String? get token => _token;
   bool get isAuthenticated => _token != null;
   bool get isLoading => _loading;
+
+  Map<String, dynamic>? _direccionActual;
+
+  Map<String, dynamic>? get direccionActual => _direccionActual;
 
   AuthProvider() {
     _loadToken();
@@ -88,7 +92,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> updateDireccion(Map<String, dynamic> data) async {
     try {
-      final id = user!['direccion']['id'];
+      final id = user!['direccion'];
       final updated =
           await _direccionService.updateDireccion(id, data, _token!);
       if (updated != null) {
@@ -98,6 +102,21 @@ class AuthProvider with ChangeNotifier {
       }
       return false;
     } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> getDireccion(int direccionId) async {
+    try {
+      final data = await _direccionService.getDir(direccionId);
+      if (data != null) {
+        _direccionActual = data;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error al cargar la dirección: $e');
       return false;
     }
   }

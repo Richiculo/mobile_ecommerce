@@ -32,18 +32,19 @@ class Producto {
   final int stockTotal;
   final Detalle? detalle;
   final List<Categoria> categorias;
+  final bool estaDisponible;
 
-  Producto({
-    required this.id,
-    required this.nombre,
-    required this.descripcion,
-    required this.proveedor,
-    this.descuento,
-    required this.imagenes,
-    required this.stockTotal,
-    this.detalle,
-    required this.categorias,
-  });
+  Producto(
+      {required this.id,
+      required this.nombre,
+      required this.descripcion,
+      required this.proveedor,
+      this.descuento,
+      required this.imagenes,
+      required this.stockTotal,
+      this.detalle,
+      required this.categorias,
+      required this.estaDisponible});
 
   factory Producto.fromJson(Map<String, dynamic> json) {
     return Producto(
@@ -54,6 +55,7 @@ class Producto {
       descuento: json['descuento']?.toDouble(),
       imagenes: List<String>.from(json['imagenes']),
       stockTotal: json['stock_total'],
+      estaDisponible: json['esta_disponible'],
       detalle:
           json['detalle'] != null ? Detalle.fromJson(json['detalle']) : null,
       categorias: (json['categorias'] as List)

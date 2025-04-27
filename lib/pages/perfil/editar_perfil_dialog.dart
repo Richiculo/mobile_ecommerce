@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/auth/auth_provider.dart';
 
 void mostrarDialogoEditarPerfil(
     BuildContext ctx, AuthProvider auth, Map<String, dynamic> user) {

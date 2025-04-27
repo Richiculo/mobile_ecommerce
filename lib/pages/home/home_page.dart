@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ecommerce/pages/login_page.dart';
-import 'package:mobile_ecommerce/providers/auth_provider.dart';
-import 'package:mobile_ecommerce/providers/cart_provider.dart';
+import 'package:mobile_ecommerce/providers/auth/auth_provider.dart';
+import 'package:mobile_ecommerce/providers/pedidos/cart_provider.dart';
 import 'package:provider/provider.dart';
-import '../../providers/producto_provider.dart';
+import '../../providers/productos/producto_provider.dart';
 import '../perfil/perfil_page.dart';
 import '../cart_page.dart';
 import '../detalle_producto_page.dart';
