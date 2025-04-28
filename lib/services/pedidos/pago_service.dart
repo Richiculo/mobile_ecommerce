@@ -10,7 +10,7 @@ class PagoService {
     final token = await storage.read(key: 'token');
 
     final response = await http.post(
-      Uri.parse('$baseUrl/pedidos/crear-intencion-pago/'),
+      Uri.parse('$baseUrl/pedidos/pago/crear-intencion-pago/'),
       headers: {
         'Authorization': 'Token $token',
         'Content-Type': 'application/json',

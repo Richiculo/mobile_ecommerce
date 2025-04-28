@@ -141,14 +141,6 @@ class HomePage extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              producto.imagenes.isNotEmpty
-                                  ? producto.imagenes[0]
-                                  : 'https://via.placeholder.com/150',
-                              height: 120,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
