@@ -4,6 +4,8 @@ import '../../providers/auth/auth_provider.dart';
 import '../login_page.dart';
 import './editar_perfil_dialog.dart';
 import './widgets/direccion_section.dart';
+import '../envio_page.dart';
+import '../ventas_user_page.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
@@ -51,12 +53,33 @@ class PerfilPage extends StatelessWidget {
               style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 30),
           DireccionSection(),
+          const SizedBox(height: 30),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.local_shipping),
+            label: const Text('Ver mis envíos'),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const EnviosPage()),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+          // Botón para ir a Mis Ventas
+          ElevatedButton.icon(
+            icon: const Icon(Icons.receipt_long),
+            label: const Text('Ver mis ventas'),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const VentasUserPage()),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
           ElevatedButton.icon(
             icon: const Icon(Icons.logout),
             label: const Text('Cerrar sesión'),
             onPressed: () {
               auth.logout();
-              // 4) Para no depender de rutas nombradas, usamos un pushReplacement
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (_) => const LoginPage()),
               );

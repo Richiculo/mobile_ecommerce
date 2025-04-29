@@ -33,7 +33,7 @@ class PagoService {
     final token = await storage.read(key: 'token');
 
     final response = await http.post(
-      Uri.parse('$baseUrl/pedidos/$pagoId/confirmar_pago/'),
+      Uri.parse('$baseUrl/pedidos/pago/$pagoId/confirmar_pago/'),
       headers: {
         'Authorization': 'Token $token',
         'Content-Type': 'application/json',
@@ -46,5 +46,15 @@ class PagoService {
     if (response.statusCode != 200) {
       throw Exception('Error al confirmar pago: ${response.body}');
     }
+  }
+
+  Future<List<Map<String, dynamic>>?> getMetodosPago() async {
+    final url = Uri.parse('$baseUrl/pedidos/metodos-pago/');
+    final resp = await http.get(url);
+    if (resp.statusCode == 200) {
+      final List<dynamic> decoded = json.decode(resp.body);
+      return decoded.map((item) => item as Map<String, dynamic>).toList();
+    }
+    return null;
   }
 }

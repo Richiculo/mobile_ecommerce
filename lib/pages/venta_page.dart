@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ecommerce/providers/pedidos/pago_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/pedidos/cart_provider.dart';
 import '../providers/pedidos/venta_provider.dart';
 import '../providers/auth/auth_provider.dart';
 import '../providers/sucursales/sucursales_provider.dart';
-import '../pages/pago_page.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:mobile_ecommerce/pages/home/home_page.dart';
 
 class VentaPage extends StatefulWidget {
   const VentaPage({super.key});
@@ -15,7 +17,7 @@ class VentaPage extends StatefulWidget {
 
 class _VentaPageState extends State<VentaPage> {
   bool _isLoading = false;
-  int metodoPagoId = 1; // Temporal: podrías hacer un selector de métodos
+  int metodoPagoId = 1; // Temporal
   bool esDelivery = true;
   int? selectedSucursalId;
 
@@ -35,12 +37,15 @@ class _VentaPageState extends State<VentaPage> {
     final sucursalesProvider =
         Provider.of<SucursalesProvider>(context, listen: false);
     sucursalesProvider.getSucursalesP();
+    final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
+    pagoProvider.obtenerMetodosPago();
   }
 
   Future<void> _finalizarCompra() async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final ventaProvider = Provider.of<VentaProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
     dynamic direccion = authProvider.user?['direccion'];
     print(direccion);
 
@@ -64,7 +69,7 @@ class _VentaPageState extends State<VentaPage> {
         });
         return;
       }
-
+      print('metodo pago que manda el page: $metodoPagoId');
       await ventaProvider.realizarVenta(
         cartId: cartProvider.cartId!,
         total: total,
@@ -79,19 +84,51 @@ class _VentaPageState extends State<VentaPage> {
 
       if (ventaPendiente != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Compra realizada con éxito!')),
+          const SnackBar(content: Text('Venta procesada con éxito!')),
         );
 
+        // 🔥Según el método de pago, decido qué hacer
+        if (/* si el metodoPagoId es Stripe */ metodoPagoId == 1) {
+          // Lógica de pago con Stripe
+          final clientSecret =
+              await pagoProvider.createIntent(((total / 7) * 100).toInt());
+
+          if (clientSecret != null) {
+            try {
+              await Stripe.instance.initPaymentSheet(
+                paymentSheetParameters: SetupPaymentSheetParameters(
+                  paymentIntentClientSecret: clientSecret,
+                  merchantDisplayName: 'Tu Tienda',
+                ),
+              );
+
+              await Stripe.instance.presentPaymentSheet();
+
+              //  Solo si el pago fue exitoso, confirmamos
+              await pagoProvider.confirmar(ventaPendiente['pago'].toString());
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Pago exitoso!')),
+              );
+
+              // Después de éxito, puedes navegar o limpiar si quieres
+            } on Exception catch (e) {
+              // Si el usuario cancela o falla el pago
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error en el pago: $e')),
+              );
+            }
+          }
+        } else {
+          // Otros métodos de pago (no Stripe)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Compra registrada!')),
+          );
+        }
+        cartProvider.clearCart();
         // Navegar a PagoPage pasando la venta pendiente
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => PagoPage(
-              amount: (total * 100).toInt(), // Monto en centavos
-              pagoId: ventaPendiente['id']
-                  .toString(), // ID de la venta para confirmar el pago
-              venta: ventaPendiente, // Venta asociada al pago
-            ),
-          ),
+          MaterialPageRoute(builder: (_) => const HomePage()),
         );
       }
     } catch (e) {
@@ -141,22 +178,42 @@ class _VentaPageState extends State<VentaPage> {
                         },
                       ),
                     ),
-                    DropdownButton<int>(
-                      value: metodoPagoId,
-                      items: const [
-                        DropdownMenuItem(
-                            value: 1, child: Text('Tarjeta de crédito')),
-                        DropdownMenuItem(
-                            value: 2, child: Text('Transferencia bancaria')),
-                        DropdownMenuItem(
-                            value: 3, child: Text('Pago en efectivo')),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            metodoPagoId = value;
-                          });
+                    Consumer<PagoProvider>(
+                      builder: (context, pagoProvider, _) {
+                        if (pagoProvider.isLoading) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Text('Cargando metodos de pago...'),
+                          );
                         }
+
+                        final metodosPago = pagoProvider.metodosPago;
+                        if (metodosPago.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Text('No hay metodos de pago disponibles.'),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: DropdownButton<int>(
+                            value: metodoPagoId,
+                            hint: const Text('Selecciona un metodo de pago'),
+                            isExpanded: true,
+                            items: metodosPago.map((metodo) {
+                              return DropdownMenuItem<int>(
+                                value: metodo['id'],
+                                child: Text(metodo['nombre']),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                metodoPagoId = value!;
+                              });
+                            },
+                          ),
+                        );
                       },
                     ),
                     Padding(
@@ -232,7 +289,7 @@ class _VentaPageState extends State<VentaPage> {
                       child: ElevatedButton.icon(
                         onPressed: _finalizarCompra,
                         icon: const Icon(Icons.payment),
-                        label: const Text('Confirmar Compra'),
+                        label: const Text('Procesar Venta'),
                       ),
                     ),
                   ],

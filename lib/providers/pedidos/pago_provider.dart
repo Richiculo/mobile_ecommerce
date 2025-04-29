@@ -7,6 +7,9 @@ class PagoProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  List<Map<String, dynamic>> _metodosPago = [];
+  List<Map<String, dynamic>> get metodosPago => _metodosPago;
+
   Future<String?> createIntent(int amount) async {
     try {
       _isLoading = true;
@@ -33,6 +36,25 @@ class PagoProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       rethrow;
+    }
+  }
+
+  Future<bool> obtenerMetodosPago() async {
+    try {
+      _isLoading = true;
+      final res = await _paymentService.getMetodosPago();
+      if (res != null) {
+        _metodosPago = res;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error al cargar los metodos de pago: $e');
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 }

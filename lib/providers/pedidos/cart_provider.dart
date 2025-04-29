@@ -7,6 +7,10 @@ class CartProvider with ChangeNotifier {
   List<dynamic> _cartItems = [];
   Cart? _cart;
   List<dynamic> get cartItems => _cartItems;
+  List<Map<String, dynamic>> _recomendaciones = [];
+  List<Map<String, dynamic>> get recomendaciones => _recomendaciones;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   Cart? get cart => _cart;
 
@@ -21,6 +25,11 @@ class CartProvider with ChangeNotifier {
     } catch (e) {
       debugPrint('Error al cargar el carrito: $e');
     }
+  }
+
+  void clearCart() {
+    _cartItems = [];
+    notifyListeners();
   }
 
   Future<void> removeItem(int productoId) async {
@@ -40,6 +49,25 @@ class CartProvider with ChangeNotifier {
       await loadCart();
     } catch (e) {
       debugPrint('Error al agregar item: $e');
+    }
+  }
+
+  Future<void> obtenerRecomendaciones() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final data = await _cartService.getRecomendaciones();
+      if (data != null) {
+        _recomendaciones = data;
+      } else {
+        _recomendaciones = [];
+      }
+    } catch (e) {
+      print('Error en fetchRecomendaciones: $e');
+      _recomendaciones = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }

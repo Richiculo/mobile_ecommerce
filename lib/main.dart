@@ -8,6 +8,7 @@ import 'package:mobile_ecommerce/providers/pedidos/cart_provider.dart';
 import 'package:mobile_ecommerce/providers/pedidos/venta_provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:mobile_ecommerce/providers/pedidos/pago_provider.dart';
+import 'package:mobile_ecommerce/providers/envios/envios_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => VentaProvider()),
         ChangeNotifierProvider(create: (_) => SucursalesProvider()),
         ChangeNotifierProvider(create: (_) => PagoProvider()),
+        ChangeNotifierProvider(create: (_) => EnviosProvider()),
       ],
       child: MaterialApp(
         title: 'Ecommerce App',

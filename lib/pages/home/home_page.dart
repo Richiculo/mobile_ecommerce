@@ -154,7 +154,7 @@ class HomePage extends StatelessWidget {
                           const SizedBox(height: 4),
                           if (tieneDescuento) ...[
                             Text(
-                              '\$${precioOriginal.toStringAsFixed(2)}',
+                              '${precioOriginal.toStringAsFixed(2)}  Bs',
                               style: const TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 fontSize: 12,
@@ -162,7 +162,7 @@ class HomePage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '\$${precioConDescuento.toStringAsFixed(2)}',
+                              '${precioConDescuento.toStringAsFixed(2)}  Bs',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -171,7 +171,7 @@ class HomePage extends StatelessWidget {
                             ),
                           ] else ...[
                             Text(
-                              '\$${precioOriginal.toStringAsFixed(2)}',
+                              '${precioOriginal.toStringAsFixed(2)}  Bs',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

@@ -63,7 +63,7 @@ class DetalleProductoPage extends StatelessWidget {
 
             if (hasDiscount) ...[
               Text(
-                '\$${precio.toStringAsFixed(2)}',
+                '${precio.toStringAsFixed(2)}  Bs',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
@@ -71,7 +71,7 @@ class DetalleProductoPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '\$${precioDescuento!.toStringAsFixed(2)}',
+                '${precioDescuento!.toStringAsFixed(2)}  Bs',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

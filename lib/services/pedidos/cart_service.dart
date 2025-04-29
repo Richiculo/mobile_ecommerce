@@ -109,4 +109,20 @@ class CartService {
       throw Exception('Error al agregar producto al carrito');
     }
   }
+
+  Future<List<Map<String, dynamic>>?> getRecomendaciones() async {
+    final url = Uri.parse('$baseUrl/pedidos/itemcarts/recomendaciones');
+    final token = await _getToken();
+    final res = await http.get(url, headers: {
+      'Authorization': 'Token $token',
+      'Content-Type': 'application/json',
+    });
+    if (res.statusCode == 200) {
+      final List<dynamic> decoded = jsonDecode(res.body);
+      return decoded.map((detalle) => detalle as Map<String, dynamic>).toList();
+    } else {
+      print('Error al obtener las recomendaciones: ${res.body}');
+      return null;
+    }
+  }
 }
