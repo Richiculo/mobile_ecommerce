@@ -17,6 +17,9 @@ dependencies:
   flutter_stripe: ^10.0.0
   speech_to_text: ^7.0.0
   flutter_tts: ^3.7.0
+  google_fonts: ^4.0.4
+  shimmer: ^3.0.0
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

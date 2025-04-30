@@ -17,16 +17,15 @@ class VentaPage extends StatefulWidget {
 
 class _VentaPageState extends State<VentaPage> {
   bool _isLoading = false;
-  int metodoPagoId = 1; // Temporal
+  int metodoPagoId = 1;
   bool esDelivery = true;
   int? selectedSucursalId;
 
   double calcularTotal(List cartItems) {
     double total = 0.0;
     for (var item in cartItems) {
-      double precioUnitario = double.parse(item['precio_unitario'].toString());
-      int cantidad = int.parse(item['cantidad'].toString());
-      total += precioUnitario * cantidad;
+      total += double.parse(item['precio_unitario'].toString()) *
+          int.parse(item['cantidad'].toString());
     }
     return total;
   }
@@ -34,11 +33,8 @@ class _VentaPageState extends State<VentaPage> {
   @override
   void initState() {
     super.initState();
-    final sucursalesProvider =
-        Provider.of<SucursalesProvider>(context, listen: false);
-    sucursalesProvider.getSucursalesP();
-    final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
-    pagoProvider.obtenerMetodosPago();
+    Provider.of<SucursalesProvider>(context, listen: false).getSucursalesP();
+    Provider.of<PagoProvider>(context, listen: false).obtenerMetodosPago();
   }
 
   Future<void> _finalizarCompra() async {
@@ -47,29 +43,21 @@ class _VentaPageState extends State<VentaPage> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
     dynamic direccion = authProvider.user?['direccion'];
-    print(direccion);
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final total = calcularTotal(cartProvider.cartItems);
-      final direccionId = direccion is Map<String, dynamic>
-          ? direccion['id']
-          : direccion; // si no es mapa, es directamente el id o null
-      print(direccionId);
+      final direccionId = direccion is Map ? direccion['id'] : direccion;
+
       if (esDelivery && direccionId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Debes registrar una dirección para envío.')),
+          const SnackBar(content: Text('Debes registrar una dirección.')),
         );
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         return;
       }
-      print('metodo pago que manda el page: $metodoPagoId');
+
       await ventaProvider.realizarVenta(
         cartId: cartProvider.cartId!,
         total: total,
@@ -83,13 +71,7 @@ class _VentaPageState extends State<VentaPage> {
       final ventaPendiente = ventaProvider.venta;
 
       if (ventaPendiente != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Venta procesada con éxito!')),
-        );
-
-        // 🔥Según el método de pago, decido qué hacer
-        if (/* si el metodoPagoId es Stripe */ metodoPagoId == 1) {
-          // Lógica de pago con Stripe
+        if (metodoPagoId == 1) {
           final clientSecret =
               await pagoProvider.createIntent(((total / 7) * 100).toInt());
 
@@ -101,19 +83,13 @@ class _VentaPageState extends State<VentaPage> {
                   merchantDisplayName: 'Tu Tienda',
                 ),
               );
-
               await Stripe.instance.presentPaymentSheet();
-
-              //  Solo si el pago fue exitoso, confirmamos
               await pagoProvider.confirmar(ventaPendiente['pago'].toString());
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Pago exitoso!')),
               );
-
-              // Después de éxito, puedes navegar o limpiar si quieres
-            } on Exception catch (e) {
-              // Si el usuario cancela o falla el pago
+            } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Error en el pago: $e')),
               );
@@ -121,13 +97,12 @@ class _VentaPageState extends State<VentaPage> {
           }
         } else {
           await pagoProvider.confirmar(ventaPendiente['pago'].toString());
-          // Otros métodos de pago (no Stripe)
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Compra registrada!')),
           );
         }
+
         cartProvider.clearCart();
-        // Navegar a PagoPage pasando la venta pendiente
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const HomePage()),
         );
@@ -137,160 +112,276 @@ class _VentaPageState extends State<VentaPage> {
         SnackBar(content: Text('Error al procesar la compra: $e')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
+  }
+
+  Widget _buildCartItem(dynamic item) {
+    final producto = item['producto'];
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.shopping_bag_outlined,
+                  color: Colors.deepPurple),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    producto['nombre'],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Cantidad: ${item['cantidad']} • \$${item['precio_unitario']} c/u',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final cartProvider = Provider.of<CartProvider>(context);
-    final cartItems = cartProvider.cartItems;
-    final authProvider = Provider.of<AuthProvider>(context);
-    final user = authProvider.user;
-    final direccion = user?['direccion'];
-    print(user);
+    final cartItems = Provider.of<CartProvider>(context).cartItems;
+    final total = calcularTotal(cartItems);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Confirmar Compra'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.deepPurple))
           : cartItems.isEmpty
               ? const Center(child: Text('Tu carrito está vacío.'))
               : Column(
                   children: [
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = cartItems[index];
-                          final producto = item['producto'];
-                          final cantidad = item['cantidad'];
-                          final precio = item['precio_unitario'];
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Resumen del carrito
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              child: const Text(
+                                'Resumen del carrito',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
 
-                          return ListTile(
-                            title: Text(producto['nombre']),
-                            subtitle:
-                                Text('Cantidad: $cantidad - \$${precio} c/u'),
-                          );
-                        },
+                            // Items del carrito (using for loop instead of spread operator)
+                            Column(
+                              children: [
+                                for (var item in cartItems)
+                                  _buildCartItem(item),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+                            const Divider(),
+
+                            // Método de pago
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 16),
+                              child: const Text(
+                                'Método de pago',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+
+                            Consumer<PagoProvider>(
+                              builder: (context, pagoProvider, _) {
+                                if (pagoProvider.isLoading) {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(8),
+                                    child: LinearProgressIndicator(),
+                                  );
+                                }
+                                final metodos = pagoProvider.metodosPago;
+                                return DropdownButtonFormField<int>(
+                                  value: metodoPagoId,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Selecciona un método',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  items: metodos
+                                      .map((m) => DropdownMenuItem<int>(
+                                          value: m['id'],
+                                          child: Text(m['nombre'])))
+                                      .toList(),
+                                  onChanged: (val) {
+                                    setState(() => metodoPagoId = val!);
+                                  },
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 20),
+                            const Divider(),
+
+                            // Método de entrega
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 16),
+                              child: const Text(
+                                'Método de entrega',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: RadioListTile<bool>(
+                                title: const Text('Delivery (a domicilio)'),
+                                value: true,
+                                groupValue: esDelivery,
+                                activeColor: Colors.deepPurple,
+                                onChanged: (val) =>
+                                    setState(() => esDelivery = val!),
+                              ),
+                            ),
+
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              child: RadioListTile<bool>(
+                                title: const Text('Recoger en sucursal'),
+                                value: false,
+                                groupValue: esDelivery,
+                                activeColor: Colors.deepPurple,
+                                onChanged: (val) =>
+                                    setState(() => esDelivery = val!),
+                              ),
+                            ),
+
+                            if (!esDelivery)
+                              Consumer<SucursalesProvider>(
+                                builder: (context, provider, _) {
+                                  final sucursales = provider.sucursales;
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    child: DropdownButtonFormField<int>(
+                                      value: selectedSucursalId,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Sucursal',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      items: sucursales
+                                          .map((s) => DropdownMenuItem<int>(
+                                                value: s['id'],
+                                                child: Text(s['nombre']),
+                                              ))
+                                          .toList(),
+                                      onChanged: (val) => setState(
+                                          () => selectedSucursalId = val),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                       ),
                     ),
-                    Consumer<PagoProvider>(
-                      builder: (context, pagoProvider, _) {
-                        if (pagoProvider.isLoading) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Text('Cargando metodos de pago...'),
-                          );
-                        }
 
-                        final metodosPago = pagoProvider.metodosPago;
-                        if (metodosPago.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Text('No hay metodos de pago disponibles.'),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: DropdownButton<int>(
-                            value: metodoPagoId,
-                            hint: const Text('Selecciona un metodo de pago'),
-                            isExpanded: true,
-                            items: metodosPago.map((metodo) {
-                              return DropdownMenuItem<int>(
-                                value: metodo['id'],
-                                child: Text(metodo['nombre']),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                metodoPagoId = value!;
-                              });
-                            },
+                    // Bottom payment bar
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, -2),
                           ),
-                        );
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('¿Cómo deseas recibir tu compra?'),
-                          RadioListTile<bool>(
-                            title: const Text('Delivery (Envío a domicilio)'),
-                            value: true,
-                            groupValue: esDelivery,
-                            onChanged: (value) {
-                              setState(() {
-                                esDelivery = value!;
-                              });
-                            },
-                          ),
-                          RadioListTile<bool>(
-                            title: const Text('Recoger en sucursal'),
-                            value: false,
-                            groupValue: esDelivery,
-                            onChanged: (value) {
-                              setState(() {
-                                esDelivery = value!;
-                              });
-                            },
-                          ),
-                          Consumer<SucursalesProvider>(
-                            builder: (context, sucursalProvider, _) {
-                              if (sucursalProvider.isLoading) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 8),
-                                  child: Text('Cargando sucursales...'),
-                                );
-                              }
-
-                              final sucursales = sucursalProvider.sucursales;
-                              if (sucursales.isEmpty) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 8),
-                                  child: Text('No hay sucursales disponibles.'),
-                                );
-                              }
-
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8),
-                                child: DropdownButton<int>(
-                                  value: selectedSucursalId,
-                                  hint: const Text('Selecciona una sucursal'),
-                                  isExpanded: true,
-                                  items: sucursales.map((sucursal) {
-                                    return DropdownMenuItem<int>(
-                                      value: sucursal['id'],
-                                      child: Text(sucursal['nombre']),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedSucursalId = value;
-                                    });
-                                  },
-                                ),
-                              );
-                            },
-                          )
                         ],
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: ElevatedButton.icon(
-                        onPressed: _finalizarCompra,
-                        icon: const Icon(Icons.payment),
-                        label: const Text('Procesar Venta'),
+                      child: SafeArea(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('Total a pagar:'),
+                                  Text(
+                                    '\$${total.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                              ),
+                              onPressed: _finalizarCompra,
+                              icon: const Icon(Icons.payment),
+                              label: const Text(
+                                'Finalizar Compra',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

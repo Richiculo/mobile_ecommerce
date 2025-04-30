@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../login_page.dart';
@@ -14,7 +15,7 @@ class PerfilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
-    // 1) Si aún no hay user, muestro un mensaje
+
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Mi Perfil')),
@@ -23,8 +24,9 @@ class PerfilPage extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Mi Perfil'),
+        title: Text('Mi Perfil', style: GoogleFonts.poppins()),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -38,46 +40,73 @@ class PerfilPage extends StatelessWidget {
 
   Widget _buildBody(
       BuildContext context, Map<String, dynamic> user, AuthProvider auth) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Correo: ${user['correo']}',
-              style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Text('Nombre: ${user['nombre']}',
-              style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Text('Apellidos: ${user['apellidos'] ?? ''}',
-              style: const TextStyle(fontSize: 18)),
+          Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Datos del usuario',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _infoTile('Correo', user['correo']),
+                  _infoTile('Nombre', user['nombre']),
+                  _infoTile('Apellidos', user['apellidos'] ?? ''),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: DireccionSection(),
+            ),
+          ),
           const SizedBox(height: 30),
-          DireccionSection(),
-          const SizedBox(height: 30),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.local_shipping),
-            label: const Text('Ver mis envíos'),
+          _buildButton(
+            context,
+            label: 'Ver mis envíos',
+            icon: Icons.local_shipping,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const EnviosPage()),
               );
             },
           ),
-          const SizedBox(height: 10),
-          // Botón para ir a Mis Ventas
-          ElevatedButton.icon(
-            icon: const Icon(Icons.receipt_long),
-            label: const Text('Ver mis ventas'),
+          const SizedBox(height: 12),
+          _buildButton(
+            context,
+            label: 'Ver mis ventas',
+            icon: Icons.receipt_long,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const VentasUserPage()),
               );
             },
           ),
-          const SizedBox(height: 10),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.logout),
-            label: const Text('Cerrar sesión'),
+          const SizedBox(height: 12),
+          _buildButton(
+            context,
+            label: 'Cerrar sesión',
+            icon: Icons.logout,
+            color: Colors.redAccent,
             onPressed: () {
               auth.logout();
               Navigator.of(context).pushReplacement(
@@ -86,6 +115,58 @@ class PerfilPage extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _infoTile(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Text(
+            "$label: ",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context,
+      {required String label,
+      required IconData icon,
+      required VoidCallback onPressed,
+      Color color = Colors.blueAccent}) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        icon: Icon(icon, color: Colors.white),
+        label: Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
     );
   }
