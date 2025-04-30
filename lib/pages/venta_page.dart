@@ -120,6 +120,7 @@ class _VentaPageState extends State<VentaPage> {
             }
           }
         } else {
+          await pagoProvider.confirmar(ventaPendiente['pago'].toString());
           // Otros métodos de pago (no Stripe)
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Compra registrada!')),

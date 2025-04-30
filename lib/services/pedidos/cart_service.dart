@@ -20,7 +20,7 @@ class CartService {
     final usuarioId = await _getUserId();
 
     final cartResponse = await http.get(
-      Uri.parse('${baseUrl}/pedidos/carts/?usuario_id=$usuarioId'),
+      Uri.parse('${baseUrl}/pedidos/carts'),
       headers: {
         'Authorization': 'Token $token',
         'Content-Type': 'application/json',

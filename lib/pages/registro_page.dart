@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth/auth_provider.dart';
 import '../pages/home/home_page.dart';
-import '../pages/registro_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  final _nombreController = TextEditingController();
+  final _apellidosController = TextEditingController();
   final _correoController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
@@ -22,26 +23,29 @@ class _LoginPageState extends State<LoginPage> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: const Text('Registrarse')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (_error != null) ...[
               Text(_error!, style: const TextStyle(color: Colors.red)),
               const SizedBox(height: 10),
             ],
             TextField(
-              controller: _correoController,
-              decoration:
-                  const InputDecoration(labelText: 'Correo electronico'),
-            ),
+                controller: _nombreController,
+                decoration: const InputDecoration(labelText: 'Nombre')),
             TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
-            ),
+                controller: _apellidosController,
+                decoration: const InputDecoration(labelText: 'Apellidos')),
+            TextField(
+                controller: _correoController,
+                decoration:
+                    const InputDecoration(labelText: 'Correo electrónico')),
+            TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: true),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _loading
@@ -51,14 +55,17 @@ class _LoginPageState extends State<LoginPage> {
                         _loading = true;
                         _error = null;
                       });
-                      final success = await authProvider.login(
-                        _correoController.text,
-                        _passwordController.text,
+
+                      final success = await authProvider.register(
+                        nombre: _nombreController.text,
+                        apellidos: _apellidosController.text,
+                        correo: _correoController.text,
+                        password: _passwordController.text,
                       );
 
                       if (!success) {
                         setState(() {
-                          _error = 'Credenciales invalidas';
+                          _error = 'Error al registrarse';
                           _loading = false;
                         });
                       } else {
@@ -67,22 +74,14 @@ class _LoginPageState extends State<LoginPage> {
                           (route) => false,
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('¡Bienvenido!')),
+                          const SnackBar(
+                              content: Text('Registro exitoso. ¡Bienvenido!')),
                         );
                       }
                     },
               child: _loading
                   ? const CircularProgressIndicator()
-                  : const Text('Iniciar sesion'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RegisterPage()),
-                );
-              },
-              child: const Text("¿No tienes cuenta? Regístrate aquí"),
+                  : const Text('Registrarse'),
             ),
           ],
         ),

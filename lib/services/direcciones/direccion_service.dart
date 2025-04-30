@@ -5,7 +5,7 @@ import '../../config/api_config.dart';
 class DireccionService {
   Future<Map<String, dynamic>?> createDireccion(
       Map<String, dynamic> data, String token) async {
-    final url = Uri.parse('$baseUrl/direcciones');
+    final url = Uri.parse('$baseUrl/direcciones/');
     final resp = await http.post(
       url,
       headers: {

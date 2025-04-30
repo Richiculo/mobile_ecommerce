@@ -75,7 +75,7 @@ class VentaService {
   Future<List<Map<String, dynamic>>?> getVentasUser() async {
     final token = await _getToken();
     final usuarioId = await _getUserId();
-    final url = Uri.parse('$baseUrl/pedidos/venta/?usuario_id=$usuarioId');
+    final url = Uri.parse('$baseUrl/pedidos/venta');
     final res = await http.get(url, headers: {
       'Authorization': 'Token $token',
       'Content-Type': 'application/json',

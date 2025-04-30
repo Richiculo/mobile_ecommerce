@@ -3,6 +3,30 @@ import 'package:http/http.dart' as http;
 import '../../config/api_config.dart';
 
 class AuthService {
+  Future<Map<String, dynamic>?> register({
+    required String nombre,
+    required String apellidos,
+    required String correo,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/register/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'nombre': nombre,
+        'apellidos': apellidos,
+        'correo': correo,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>?> login(String correo, String password) async {
     final url = Uri.parse('$baseUrl/login/');
     final response = await http.post(

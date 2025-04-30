@@ -35,6 +35,28 @@ class AuthProvider with ChangeNotifier {
 
   Map<String, dynamic>? get user => _user;
 
+  Future<bool> register({
+    required String nombre,
+    required String apellidos,
+    required String correo,
+    required String password,
+  }) async {
+    final response = await _authService.register(
+      nombre: nombre,
+      apellidos: apellidos,
+      correo: correo,
+      password: password,
+    );
+
+    if (response != null && response['token'] != null) {
+      _token = response['token'];
+      notifyListeners();
+      return true;
+    }
+
+    return false;
+  }
+
   Future<bool> login(String correo, String password) async {
     final data = await _authService.login(correo, password);
     if (data != null) {
